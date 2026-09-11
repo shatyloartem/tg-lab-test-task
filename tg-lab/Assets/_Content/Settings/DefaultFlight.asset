@@ -12,22 +12,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0ca2344ef27be74eb62b5e6a9c449ec, type: 3}
   m_Name: DefaultFlight
   m_EditorClassIdentifier: 
-  mass: 800
-  centerOfMass: {x: 0, y: -0.25, z: 0}
-  maximumThrust: 17000
-  rotorResponseTime: 0.3
-  reactionTorquePerNewton: 0.08
-  maximumCyclicTorque: 14000
-  maximumTailTorque: 9000
-  maximumTilt: 23
-  yawSpeed: 65
-  climbSpeed: 4
-  descentSpeed: 2.5
-  cyclicResponseTime: 0.2
-  attitudeGain: 12
-  angularDamping: 6
-  altitudeGain: 1.2
-  verticalSpeedGain: 3
-  airDensity: 1.225
-  dragArea: {x: 5, y: 8, z: 2.5}
-  rotationalDrag: 220
+  _mass: 800
+  _centerOfMass: {x: 0, y: -0.25, z: 0}
+  _maximumThrust: 17000
+  _rotorResponseTime: 0.3
+  _reactionTorquePerNewton: 0.08
+  _maximumCyclicTorque: 14000
+  _maximumTailTorque: 9000
+  _maximumTilt: 35
+  _yawSpeed: 65
+  _climbSpeed: 4
+  _descentSpeed: 2.5
+  _cyclicResponseTime: 0.2
+  _flightAssists:
+    _enabledFeatures: 61
+  _attitudeGain: 12
+  _angularDamping: 6
+  _altitudeGain: 1.2
+  _verticalSpeedGain: 3
+  _airDensity: 1.225
+  _dragArea: {x: 5, y: 8, z: 2.5}
+  _rotationalDrag: 220

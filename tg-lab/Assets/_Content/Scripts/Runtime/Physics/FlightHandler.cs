@@ -8,6 +8,7 @@ namespace Runtime.Physics
     {
         protected readonly Rigidbody Body;
         protected readonly HelicopterSettings Settings;
+
         private bool enabled = true;
 
         public bool Enabled
@@ -15,7 +16,9 @@ namespace Runtime.Physics
             get => enabled;
             set
             {
-                if (enabled == value) return;
+                if (enabled == value)
+                    return;
+
                 enabled = value;
                 Reset();
             }
@@ -28,7 +31,10 @@ namespace Runtime.Physics
         }
 
         public abstract void Step(ref FlightFrame frame);
-        public virtual void Reset() { }
+
+        public virtual void Reset()
+        {
+        }
     }
 
     public struct FlightFrame
@@ -36,6 +42,7 @@ namespace Runtime.Physics
         public readonly FlightCommand Command;
         public readonly bool IsRunning;
         public readonly float DeltaTime;
+        public FlightControl Control;
         public float Thrust;
 
         public FlightFrame(FlightCommand command, bool isRunning, float deltaTime)
@@ -43,6 +50,7 @@ namespace Runtime.Physics
             Command = command;
             IsRunning = isRunning;
             DeltaTime = deltaTime;
+            Control = default;
             Thrust = 0f;
         }
     }

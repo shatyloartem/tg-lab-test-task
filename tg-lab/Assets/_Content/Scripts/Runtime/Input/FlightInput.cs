@@ -20,39 +20,47 @@ namespace Runtime.Input
 
     public sealed class FlightInput : MonoBehaviour
     {
-        [SerializeField] private InputActionAsset actions;
-        [SerializeField] private HelicopterController helicopter;
-        private InputActionAsset instance;
-        private InputAction move;
-        private InputAction vertical;
-        private InputAction yaw;
-        private InputAction reset;
+        [SerializeField] private InputActionAsset _actions;
+        [SerializeField] private HelicopterController _helicopter;
+        
+        private InputActionAsset _instance;
+        private InputAction _move;
+        private InputAction _vertical;
+        private InputAction _yaw;
+        private InputAction _reset;
 
         private void Awake()
         {
-            // Each helicopter owns its action state, even when sharing the same asset.
-            instance = Instantiate(actions);
-            move = instance.FindAction("Flight/Move", true);
-            vertical = instance.FindAction("Flight/Vertical", true);
-            yaw = instance.FindAction("Flight/Yaw", true);
-            reset = instance.FindAction("Flight/Reset", true);
+            _instance = Instantiate(_actions);
+
+            _move = GetAction("Flight/Move");
+            _vertical = GetAction("Flight/Vertical");
+            _yaw = GetAction("Flight/Yaw");
+            _reset = GetAction("Flight/Reset");
+            return;
+
+            InputAction GetAction(string a) => _instance.FindAction(a, true);
         }
 
-        private void OnEnable() => instance.Enable();
+        private void OnEnable() => _instance.Enable();
 
         private void Update()
         {
-            if (reset.WasPressedThisFrame()) helicopter.ResetFlight();
-            helicopter.Command = new FlightCommand(move.ReadValue<Vector2>(),
-                vertical.ReadValue<float>(), yaw.ReadValue<float>());
+            if (_reset.WasPressedThisFrame()) 
+                _helicopter.ResetFlight();
+            
+            _helicopter.Command = new FlightCommand(
+                _move.ReadValue<Vector2>(), 
+                _vertical.ReadValue<float>(), 
+                _yaw.ReadValue<float>());
         }
 
         private void OnDisable()
         {
-            instance.Disable();
-            helicopter.Command = default;
+            _instance.Disable();
+            _helicopter.Command = default;
         }
 
-        private void OnDestroy() => Destroy(instance);
+        private void OnDestroy() => Destroy(_instance);
     }
 }

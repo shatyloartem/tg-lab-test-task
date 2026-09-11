@@ -108,3 +108,6 @@ InitTestScene*.unity*
 
 # Editors
 /.idea/
+
+# DOTWeen
+*.csproj.DotSettings

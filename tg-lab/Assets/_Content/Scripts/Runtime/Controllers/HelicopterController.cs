@@ -10,89 +10,110 @@ namespace Runtime.Controllers
     {
         [SerializeField] private HelicopterSettings _settings;
 
-        private Rigidbody body;
-        private FlightHandler[] handlers;
-        private MainRotorHandler mainRotor;
-        private GroundContactHandler groundContact = new();
-        private Vector3 spawnPosition;
-        private Quaternion spawnRotation;
+        private FlightHandler[] _flightPipeline;
+        private MainRotorHandler _mainRotorHandler;
+        private readonly GroundContactHandler r_groundContactHandler = new();
+        
+        private Rigidbody _body;
+        private Vector3 _spawnPosition;
+        private Quaternion _spawnRotation;
 
         public FlightCommand Command { get; set; }
-        public bool IsGrounded => groundContact != null && groundContact.IsGrounded;
+        public bool IsGrounded => r_groundContactHandler.IsGrounded;
         public bool IsRunning { get; private set; }
-        public float ThrustFraction => mainRotor == null ? 0f : mainRotor.Thrust / _settings.maximumThrust;
-        public Vector3 Velocity => body.linearVelocity;
+        public float ThrustFraction => _mainRotorHandler == null ? 0f : _mainRotorHandler.Thrust / _settings._maximumThrust;
+        public Vector3 Velocity => _body.linearVelocity;
 
         private void Awake() => Initialize();
 
         private void Initialize()
         {
-            body = GetComponent<Rigidbody>();
-            body.mass = _settings.mass;
-            body.centerOfMass = _settings.centerOfMass;
-            body.useGravity = true;
-            body.linearDamping = 0f;
-            body.angularDamping = 0f;
-            body.interpolation = RigidbodyInterpolation.Interpolate;
-            body.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
-            mainRotor = new MainRotorHandler(body, _settings);
-            handlers = new FlightHandler[]
+            SetupRigidbody();
+
+            _mainRotorHandler = new MainRotorHandler(_body, _settings);
+            _flightPipeline = new FlightHandler[]
             {
-                mainRotor,
-                new StabilizationHandler(body, _settings),
-                new YawHandler(body, _settings),
-                new AerodynamicDragHandler(body, _settings)
+                // Control phase
+                new PilotControlHandler(_body, _settings),
+                new RotorTorqueCompensationHandler(_body, _settings),
+                new StabilizationHandler(_body, _settings),
+
+                // Physics phase
+                _mainRotorHandler,
+                new CyclicHandler(_body, _settings),
+                new TailRotorHandler(_body, _settings),
+                new AerodynamicDragHandler(_body, _settings)
             };
-            spawnPosition = body.position;
-            spawnRotation = body.rotation;
+
+            _spawnPosition = _body.position;
+            _spawnRotation = _body.rotation;
         }
 
         private void FixedUpdate() => Step(Time.fixedDeltaTime);
 
         private void Step(float dt)
         {
-            if (Command.Vertical > 0.01f) 
-                IsRunning = true;
-            else if (IsGrounded && Command.Vertical < -0.01f) 
-                IsRunning = false;
+            UpdateRunningState();
 
             FlightFrame frame = new(Command, IsRunning, dt);
-            foreach (FlightHandler handler in handlers)
+            foreach (var handler in _flightPipeline)
             {
                 if (handler.Enabled)
-                    handler.Step(ref frame);   
-            }
-        }
-
-        public void SetHandlerEnabled<T>(bool active) where T : FlightHandler
-        {
-            foreach (FlightHandler handler in handlers)
-            {
-                if (handler is not T) 
-                    continue;
-                
-                handler.Enabled = active;
-                return;
+                    handler.Step(ref frame);
             }
         }
 
         public void ResetFlight()
         {
-            body.position = spawnPosition;
-            body.rotation = spawnRotation;
-            body.linearVelocity = Vector3.zero;
-            body.angularVelocity = Vector3.zero;
+            _body.position = _spawnPosition;
+            _body.rotation = _spawnRotation;
+            _body.linearVelocity = Vector3.zero;
+            _body.angularVelocity = Vector3.zero;
+
             Command = default;
             IsRunning = false;
-            foreach (FlightHandler handler in handlers)
+            
+            foreach (var handler in _flightPipeline)
                 handler.Reset();
 
-            groundContact.Reset();
-            body.WakeUp();
+            r_groundContactHandler.Reset();
+            _body.WakeUp();
         }
 
-        private void OnCollisionEnter(Collision collision) => groundContact.Enter(collision);
-        private void OnCollisionStay(Collision collision) => groundContact.Stay(collision);
-        private void OnCollisionExit(Collision collision) => groundContact.Exit(collision);
+        public void SetHandlerEnabled<T>(bool active) where T : FlightHandler
+        {
+            foreach (var handler in _flightPipeline)
+            {
+                if (handler is T)
+                {
+                    handler.Enabled = active;
+                    return;
+                }
+            }
+        }
+        
+        private void SetupRigidbody()
+        {
+            _body = GetComponent<Rigidbody>();
+            _body.mass = _settings._mass;
+            _body.centerOfMass = _settings._centerOfMass;
+            _body.useGravity = true;
+            _body.linearDamping = 0f;
+            _body.angularDamping = 0f;
+            _body.interpolation = RigidbodyInterpolation.Interpolate;
+            _body.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
+        }
+
+        private void UpdateRunningState()
+        {
+            if (Command.Vertical > 0.01f)
+                IsRunning = true;
+            else if (IsGrounded && Command.Vertical < -0.01f)
+                IsRunning = false;
+        }
+        
+        private void OnCollisionEnter(Collision collision) => r_groundContactHandler.Enter(collision);
+        private void OnCollisionStay(Collision collision) => r_groundContactHandler.Stay(collision);
+        private void OnCollisionExit(Collision collision) => r_groundContactHandler.Exit(collision);
     }
 }

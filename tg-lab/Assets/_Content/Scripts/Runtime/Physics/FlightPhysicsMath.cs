@@ -7,6 +7,9 @@ namespace Runtime.Physics
         public static float Response(float deltaTime, float responseTime) =>
             1f - Mathf.Exp(-deltaTime / Mathf.Max(0.01f, responseTime));
 
+        public static float RotorAuthority(float thrust, float mass) =>
+            Mathf.Clamp01(thrust / (mass * -UnityEngine.Physics.gravity.y));
+
         public static Vector3 Drag(Vector3 airVelocity, Vector3 dragArea, float density)
         {
             return -0.5f * density * Vector3.Scale(dragArea, new Vector3(

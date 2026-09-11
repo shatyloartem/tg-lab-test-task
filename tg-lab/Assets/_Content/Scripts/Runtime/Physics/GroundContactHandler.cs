@@ -20,7 +20,9 @@ namespace Runtime.Physics
             contacts.Remove(collision.collider);
             for (int i = 0; i < collision.contactCount; i++)
             {
-                if (Vector3.Dot(collision.GetContact(i).normal, Vector3.up) <= 0.5f) continue;
+                if (Vector3.Dot(collision.GetContact(i).normal, Vector3.up) <= 0.5f)
+                    continue;
+
                 contacts.Add(collision.collider);
                 return;
             }

@@ -11,9 +11,9 @@ namespace Runtime.Physics
         {
             Quaternion rotation = Body.rotation;
             Vector3 localVelocity = Quaternion.Inverse(rotation) * Body.linearVelocity;
-            Vector3 localDrag = FlightPhysicsMath.Drag(localVelocity, Settings.dragArea, Settings.airDensity);
+            Vector3 localDrag = FlightPhysicsMath.Drag(localVelocity, Settings._dragArea, Settings._airDensity);
             Body.AddForce(rotation * localDrag, ForceMode.Force);
-            Body.AddTorque(-Body.angularVelocity * Settings.rotationalDrag, ForceMode.Force);
+            Body.AddTorque(-Body.angularVelocity * Settings._rotationalDrag, ForceMode.Force);
         }
     }
 }
