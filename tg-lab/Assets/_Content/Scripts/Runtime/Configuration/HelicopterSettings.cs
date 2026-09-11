@@ -22,6 +22,8 @@ namespace Runtime.Configuration
         [Min(0.1f)] public float _climbSpeed = 4f;
         [Min(0.1f)] public float _descentSpeed = 2.5f;
         [Min(0.01f)] public float _cyclicResponseTime = 0.2f;
+        [Tooltip("Cyclic torque at full pilot input when attitude stabilization is disabled.")]
+        [Min(1f)] public float _manualCyclicTorque = 3000f;
 
         [Header("Flight assists")]
         [SerializeField] private FlightAssistSettings _flightAssists = new();
@@ -39,7 +41,5 @@ namespace Runtime.Configuration
         [Min(0f)] public float _rotationalDrag = 220f;
 
         public FlightAssistSettings FlightAssists => _flightAssists ??= new FlightAssistSettings();
-
-        public bool IsFlightAssistEnabled(FlightAssistFeature feature) => FlightAssists.IsEnabled(feature);
     }
 }

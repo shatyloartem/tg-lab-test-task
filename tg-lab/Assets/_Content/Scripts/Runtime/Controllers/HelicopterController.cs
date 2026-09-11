@@ -1,6 +1,7 @@
 using Runtime.Configuration;
 using Runtime.Input;
 using Runtime.Physics;
+using Runtime.Physics.Handlers;
 using UnityEngine;
 
 namespace Runtime.Controllers
@@ -35,7 +36,6 @@ namespace Runtime.Controllers
             {
                 // Control phase
                 new PilotControlHandler(_body, _settings),
-                new RotorTorqueCompensationHandler(_body, _settings),
                 new StabilizationHandler(_body, _settings),
 
                 // Physics phase

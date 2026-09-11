@@ -24,8 +24,9 @@ MonoBehaviour:
   _climbSpeed: 4
   _descentSpeed: 2.5
   _cyclicResponseTime: 0.2
+  _manualCyclicTorque: 3000
   _flightAssists:
-    _enabledFeatures: 61
+    _enabledFeatures: -1
   _attitudeGain: 12
   _angularDamping: 6
   _altitudeGain: 1.2

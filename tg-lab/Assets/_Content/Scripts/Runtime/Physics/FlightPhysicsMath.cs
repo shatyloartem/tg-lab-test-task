@@ -4,7 +4,7 @@ namespace Runtime.Physics
 {
     public static class FlightPhysicsMath
     {
-        public static float Response(float deltaTime, float responseTime) =>
+        public static float ExpSmoothingFactor(float deltaTime, float responseTime) =>
             1f - Mathf.Exp(-deltaTime / Mathf.Max(0.01f, responseTime));
 
         public static float RotorAuthority(float thrust, float mass) =>
@@ -18,8 +18,7 @@ namespace Runtime.Physics
                 airVelocity.z * Mathf.Abs(airVelocity.z)));
         }
 
-        public static Vector3 InertiaTorque(Vector3 angularAcceleration,
-            Quaternion principalRotation, Vector3 inertiaTensor)
+        public static Vector3 InertiaTorque(Vector3 angularAcceleration, Quaternion principalRotation, Vector3 inertiaTensor)
         {
             return principalRotation * Vector3.Scale(inertiaTensor,
                 Quaternion.Inverse(principalRotation) * angularAcceleration);

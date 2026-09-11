@@ -1,16 +1,14 @@
 using Runtime.Configuration;
 using UnityEngine;
 
-namespace Runtime.Physics
+namespace Runtime.Physics.Handlers
 {
     public sealed class MainRotorHandler : FlightHandler
     {
         public float Thrust { get; private set; }
 
-        public MainRotorHandler(Rigidbody body, HelicopterSettings settings)
-            : base(body, settings)
-        {
-        }
+        public MainRotorHandler(Rigidbody body, HelicopterSettings settings) : base(body, settings)
+        { }
 
         public override void Step(ref FlightFrame frame)
         {
@@ -18,11 +16,12 @@ namespace Runtime.Physics
                 frame.Control.MainRotorThrust,
                 0f,
                 Settings._maximumThrust);
-            float response = FlightPhysicsMath.Response(
+
+            float smoothingFactor = FlightPhysicsMath.ExpSmoothingFactor(
                 frame.DeltaTime,
                 Settings._rotorResponseTime);
 
-            Thrust = Mathf.Lerp(Thrust, targetThrust, response);
+            Thrust = Mathf.Lerp(Thrust, targetThrust, smoothingFactor);
             frame.Thrust = Thrust;
 
             Vector3 rotorUp = Body.rotation * Vector3.up;

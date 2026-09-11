@@ -1,7 +1,7 @@
 using Runtime.Configuration;
 using UnityEngine;
 
-namespace Runtime.Physics
+namespace Runtime.Physics.Handlers
 {
     public sealed class AerodynamicDragHandler : FlightHandler
     {

@@ -7,24 +7,18 @@ namespace Runtime.Configuration
     public enum FlightAssistFeature
     {
         None = 0,
-        CyclicInputSmoothing = 1 << 0,
+        CyclicInputFiltering = 1 << 0,
         AttitudeStabilization = 1 << 1,
         AngularVelocityDamping = 1 << 2,
         AltitudeHold = 1 << 3,
         HeadingHold = 1 << 4,
-        MainRotorTorqueCompensation = 1 << 5,
-        All = CyclicInputSmoothing
-            | AttitudeStabilization
-            | AngularVelocityDamping
-            | AltitudeHold
-            | HeadingHold
-            | MainRotorTorqueCompensation
+        MainRotorTorqueCompensation = 1 << 5
     }
 
     [Serializable]
     public sealed class FlightAssistSettings
     {
-        [SerializeField] private FlightAssistFeature _enabledFeatures = FlightAssistFeature.All;
+        [SerializeField] private FlightAssistFeature _enabledFeatures = ~FlightAssistFeature.None;
 
         public FlightAssistFeature EnabledFeatures
         {
@@ -33,8 +27,7 @@ namespace Runtime.Configuration
         }
 
         public bool IsEnabled(FlightAssistFeature feature) =>
-            feature != FlightAssistFeature.None &&
-            (_enabledFeatures & feature) == feature;
+            feature != FlightAssistFeature.None && (_enabledFeatures & feature) == feature;
 
         public void SetEnabled(FlightAssistFeature feature, bool enabled)
         {
