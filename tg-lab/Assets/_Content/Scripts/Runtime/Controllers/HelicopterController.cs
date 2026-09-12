@@ -10,6 +10,7 @@ namespace Runtime.Controllers
     {
         [SerializeField] private HelicopterSettings _settings;
 
+        private HelicopterSettings _runtimeSettings;
         private FlightHandler[] _flightPipeline;
         private MainRotorHandler _mainRotorHandler;
         private readonly GroundContactHandler r_groundContactHandler = new();
@@ -22,27 +23,31 @@ namespace Runtime.Controllers
 
         public bool IsGrounded => r_groundContactHandler.IsGrounded;
         public bool IsRunning { get; private set; }
-        public float ThrustFraction => _mainRotorHandler == null ? 0f : _mainRotorHandler.Thrust / _settings._maximumThrust;
+        public FlightCommand CurrentCommand => _command;
+        public float MainRotorThrust => _mainRotorHandler == null ? 0f : _mainRotorHandler.Thrust;
+        public float MaximumThrust => _runtimeSettings == null ? 0f : _runtimeSettings._maximumThrust;
+        public float ThrustFraction => MaximumThrust <= 0f ? 0f : MainRotorThrust / MaximumThrust;
         public Vector3 Velocity => _body.linearVelocity;
 
         private void Awake() => Initialize();
 
         private void Initialize()
         {
+            _runtimeSettings = Instantiate(_settings);
             SetupRigidbody();
 
-            _mainRotorHandler = new MainRotorHandler(_body, _settings);
+            _mainRotorHandler = new MainRotorHandler(_body, _runtimeSettings);
             _flightPipeline = new FlightHandler[]
             {
                 // Control phase
-                new PilotControlHandler(_body, _settings),
-                new StabilizationHandler(_body, _settings),
+                new PilotControlHandler(_body, _runtimeSettings),
+                new StabilizationHandler(_body, _runtimeSettings),
 
                 // Physics phase
                 _mainRotorHandler,
-                new CyclicHandler(_body, _settings),
-                new TailRotorHandler(_body, _settings),
-                new AerodynamicDragHandler(_body, _settings)
+                new CyclicHandler(_body, _runtimeSettings),
+                new TailRotorHandler(_body, _runtimeSettings),
+                new AerodynamicDragHandler(_body, _runtimeSettings)
             };
 
             _spawnPosition = _body.position;
@@ -72,6 +77,15 @@ namespace Runtime.Controllers
         public void SetCommand(FlightCommand command) => _command = command;
 
         public void RequestReset() => _resetRequested = true;
+
+        public bool IsFlightAssistEnabled(FlightAssistFeature feature) =>
+            (_runtimeSettings != null ? _runtimeSettings : _settings).FlightAssists.IsEnabled(feature);
+
+        public void SetFlightAssistEnabled(FlightAssistFeature feature, bool enabled)
+        {
+            if (_runtimeSettings != null)
+                _runtimeSettings.FlightAssists.SetEnabled(feature, enabled);
+        }
 
         private void ResetFlight()
         {
@@ -106,8 +120,8 @@ namespace Runtime.Controllers
         private void SetupRigidbody()
         {
             _body = GetComponent<Rigidbody>();
-            _body.mass = _settings._mass;
-            _body.centerOfMass = _settings._centerOfMass;
+            _body.mass = _runtimeSettings._mass;
+            _body.centerOfMass = _runtimeSettings._centerOfMass;
             _body.useGravity = true;
             _body.linearDamping = 0f;
             _body.angularDamping = 0f;
@@ -126,5 +140,11 @@ namespace Runtime.Controllers
         private void OnCollisionEnter(Collision collision) => r_groundContactHandler.Enter(collision);
         private void OnCollisionStay(Collision collision) => r_groundContactHandler.Stay(collision);
         private void OnCollisionExit(Collision collision) => r_groundContactHandler.Exit(collision);
+
+        private void OnDestroy()
+        {
+            if (_runtimeSettings != null)
+                Destroy(_runtimeSettings);
+        }
     }
 }
