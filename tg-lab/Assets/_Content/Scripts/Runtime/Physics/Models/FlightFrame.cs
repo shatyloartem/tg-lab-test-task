@@ -1,5 +1,3 @@
-using Runtime.Input;
-
 namespace Runtime.Physics
 {
     public struct FlightFrame

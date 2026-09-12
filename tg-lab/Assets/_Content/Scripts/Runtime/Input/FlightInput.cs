@@ -1,23 +1,10 @@
 using Runtime.Controllers;
+using Runtime.Physics;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 namespace Runtime.Input
 {
-    public readonly struct FlightCommand
-    {
-        public readonly Vector2 Cyclic;
-        public readonly float Vertical;
-        public readonly float Yaw;
-
-        public FlightCommand(Vector2 cyclic, float vertical, float yaw)
-        {
-            Cyclic = Vector2.ClampMagnitude(cyclic, 1f);
-            Vertical = Mathf.Clamp(vertical, -1f, 1f);
-            Yaw = Mathf.Clamp(yaw, -1f, 1f);
-        }
-    }
-
     public sealed class FlightInput : MonoBehaviour
     {
         [SerializeField] private InputActionAsset _actions;
@@ -47,18 +34,18 @@ namespace Runtime.Input
         private void Update()
         {
             if (_reset.WasPressedThisFrame()) 
-                _helicopter.ResetFlight();
+                _helicopter.RequestReset();
             
-            _helicopter.Command = new FlightCommand(
+            _helicopter.SetCommand(new FlightCommand(
                 _move.ReadValue<Vector2>(), 
                 _vertical.ReadValue<float>(), 
-                _yaw.ReadValue<float>());
+                _yaw.ReadValue<float>()));
         }
 
         private void OnDisable()
         {
             _instance.Disable();
-            _helicopter.Command = default;
+            _helicopter.SetCommand(default);
         }
 
         private void OnDestroy() => Destroy(_instance);

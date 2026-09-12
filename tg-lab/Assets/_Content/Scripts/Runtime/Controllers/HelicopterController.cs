@@ -1,5 +1,4 @@
 using Runtime.Configuration;
-using Runtime.Input;
 using Runtime.Physics;
 using Runtime.Physics.Handlers;
 using UnityEngine;
@@ -18,8 +17,9 @@ namespace Runtime.Controllers
         private Rigidbody _body;
         private Vector3 _spawnPosition;
         private Quaternion _spawnRotation;
+        private FlightCommand _command;
+        private bool _resetRequested;
 
-        public FlightCommand Command { get; set; }
         public bool IsGrounded => r_groundContactHandler.IsGrounded;
         public bool IsRunning { get; private set; }
         public float ThrustFraction => _mainRotorHandler == null ? 0f : _mainRotorHandler.Thrust / _settings._maximumThrust;
@@ -49,13 +49,19 @@ namespace Runtime.Controllers
             _spawnRotation = _body.rotation;
         }
 
-        private void FixedUpdate() => Step(Time.fixedDeltaTime);
+        private void FixedUpdate()
+        {
+            if (_resetRequested)
+                ResetFlight();
+
+            Step(Time.fixedDeltaTime);
+        }
 
         private void Step(float dt)
         {
             UpdateRunningState();
 
-            FlightFrame frame = new(Command, IsRunning, dt);
+            FlightFrame frame = new(_command, IsRunning, dt);
             foreach (var handler in _flightPipeline)
             {
                 if (handler.Enabled)
@@ -63,14 +69,19 @@ namespace Runtime.Controllers
             }
         }
 
-        public void ResetFlight()
+        public void SetCommand(FlightCommand command) => _command = command;
+
+        public void RequestReset() => _resetRequested = true;
+
+        private void ResetFlight()
         {
             _body.position = _spawnPosition;
             _body.rotation = _spawnRotation;
             _body.linearVelocity = Vector3.zero;
             _body.angularVelocity = Vector3.zero;
 
-            Command = default;
+            _command = default;
+            _resetRequested = false;
             IsRunning = false;
             
             foreach (var handler in _flightPipeline)
@@ -106,9 +117,9 @@ namespace Runtime.Controllers
 
         private void UpdateRunningState()
         {
-            if (Command.Vertical > 0.01f)
+            if (_command.Vertical > 0.01f)
                 IsRunning = true;
-            else if (IsGrounded && Command.Vertical < -0.01f)
+            else if (IsGrounded && _command.Vertical < -0.01f)
                 IsRunning = false;
         }
         
