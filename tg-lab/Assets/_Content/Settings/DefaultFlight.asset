@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0ca2344ef27be74eb62b5e6a9c449ec, type: 3}
+  m_Name: DefaultFlight
+  m_EditorClassIdentifier: 
+  _mass: 800
+  _centerOfMass: {x: 0, y: -0.25, z: 0}
+  _maximumThrust: 17000
+  _rotorResponseTime: 0.3
+  _reactionTorquePerNewton: 0.08
+  _maximumCyclicTorque: 14000
+  _maximumTailTorque: 9000
+  _maximumTilt: 35
+  _yawSpeed: 65
+  _climbSpeed: 4
+  _descentSpeed: 2.5
+  _cyclicResponseTime: 0.2
+  _manualCyclicTorque: 3000
+  _flightAssists:
+    _enabledFeatures: -1
+  _attitudeGain: 12
+  _angularDamping: 6
+  _altitudeGain: 1.2
+  _verticalSpeedGain: 3
+  _airDensity: 1.225
+  _dragArea: {x: 5, y: 8, z: 2.5}
+  _rotationalDrag: 220
