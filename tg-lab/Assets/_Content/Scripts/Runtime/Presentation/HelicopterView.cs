@@ -21,8 +21,8 @@ namespace Runtime.Presentation
         {
             float target = _helicopter.IsRunning ? 950f + _helicopter.ThrustFraction * 650f : 0f;
             _rotorSpeed = Mathf.MoveTowards(_rotorSpeed, target, 900f * Time.deltaTime);
-            _mainRotor.Rotate(Vector3.up, _rotorSpeed * Time.deltaTime, Space.Self);
-            _tailRotor.Rotate(Vector3.right, _rotorSpeed * 1.6f * Time.deltaTime, Space.Self);
+            _mainRotor.Rotate(Vector3.forward, _rotorSpeed * Time.deltaTime, Space.Self);
+            _tailRotor.Rotate(Vector3.up, _rotorSpeed * 1.6f * Time.deltaTime, Space.Self);
         }
     }
 }
